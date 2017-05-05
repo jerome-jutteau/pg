@@ -1,0 +1,1 @@
+LIBRARY_PATH=~/packetgraph-build/lib/ LD_LIBRARY_PATH=~/packetgraph-build/lib/ C_INCLUDE_PATH=~/packetgraph-build/include/ cargo test
