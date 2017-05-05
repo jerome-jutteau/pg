@@ -1,0 +1,9 @@
+[package]
+name = "pg"
+version = "0.1.0"
+authors = ["jerome.jutteau <jerome.jutteau@outscale.com>"]
+
+[dependencies]
+packetgraph-sys = { git = "https://github.com/outscale/packetgraph-sys.git" }
+lazy_static = "0.2"
+
