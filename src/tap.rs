@@ -22,6 +22,22 @@ impl Brick for Tap {
     fn pollable(&self) -> bool {
         true
     }
+
+    fn link<B: Brick>(&mut self, east: &mut B) -> Result<(), Error> {
+        brick::link(&mut self, &mut east)
+    }
+
+    fn unlink<B: Brick>(&mut self, east: &mut B) -> Result<(), Error> {
+        brick::unlink(&mut self, &mut east)
+    }
+
+    fn unlink_all(&mut self) {
+        brick::unlink_all(&mut self)
+    }
+
+    fn poll(&mut self)  -> Result<usize, Error> {
+        brick::poll(&mut self)
+    }
 }
 
 impl Tap {

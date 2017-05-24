@@ -1,9 +1,14 @@
-/*pub struct Graph{
+use brick::Brick;
+use error::Error;
+use packetgraph_sys::pg_graph;
+
+pub struct Graph{
     pub name: String,
     graph: *mut pg_graph,
-	bricks: HashMap<String, Box<Brick>>,
+	bricks: Vec<Box<Brick>>,
 }
 
+/*
 impl Drop for Graph {
     fn drop(&mut self) {
 		// TODO: must empty graph before feeing pg_graph

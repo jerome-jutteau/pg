@@ -16,6 +16,7 @@ pub trait Brick {
 	fn get_type(&self) -> Type;
     fn pollable(&self) -> bool;
 
+/*
     fn link<B: Brick>(&mut self, east: &mut B) -> Result<(), Error> {
         let mut error = Error::new();
         unsafe {
@@ -65,7 +66,64 @@ pub trait Brick {
         }
         assert!(!error.is_set());
     }
+*/
+
+    fn link<B: Brick>(&mut self, east: &mut B) -> Result<(), Error>;
+    fn unlink<B: Brick>(&mut self, east: &mut B) -> Result<(), Error>;
+    fn unlink_all(&mut self);
+    fn poll(&mut self)  -> Result<usize, Error>;
 }
+
+
+pub    fn link<B: Brick>(west: &mut B, east: &mut B) -> Result<(), Error> {
+        let mut error = Error::new();
+        unsafe {
+            pg_brick_link(west.brick(), east.brick(), &mut error.ptr);
+        }
+
+        match error.is_set() {
+            true => Err(error),
+            false => Ok(()),
+        }
+    }
+
+pub    fn unlink<B: Brick>(west: &mut B, east: &mut B) -> Result<(), Error> {
+        let mut error = Error::new();
+        unsafe {
+            pg_brick_unlink_edge(self.brick(), east.brick(), &mut error.ptr);
+        }
+
+        match error.is_set() {
+            true => Err(error),
+            false => Ok(()),
+        }
+    }
+
+pub    fn poll<B: Brick>(b: &mut B) -> Result<usize, Error> {
+        let mut error = Error::new();
+        if !b.pollable() {
+            error.set("Brick is not pollable");
+            return Err(error);
+        }
+    
+        let mut n: u16 = 0;
+        unsafe {
+            pg_brick_poll(b.brick(), &mut n, &mut error.ptr);
+        }
+
+        match error.is_set() {
+            true => Err(error),
+            false => Ok(n as usize),
+        }
+    }
+
+pub    fn unlink_all<B: Brick>(b: &mut B) {
+        let mut error = Error::new();
+        unsafe {
+            pg_brick_unlink(b.brick(), &mut error.ptr);
+        }
+        assert!(!error.is_set());
+    }
 
 #[cfg(test)]
 mod tests {
