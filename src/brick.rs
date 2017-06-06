@@ -25,6 +25,9 @@ use switch::Switch;
 use nic::Nic;
 use hub::Hub;
 use vhost::Vhost;
+use std::process::{Command, Stdio};
+use std::error::Error as StdErr;
+use std::io::prelude::*;
 
 // Maybe use a better wrapper of pg_brick raw pointer
 unsafe impl Send for Brick {}
@@ -156,7 +159,54 @@ impl<'a> Brick {
                 return Err(error);
             }
         }
-        Ok(String::from_utf8(v).unwrap())
+        let mut s = String::new();
+        for c in v.iter() {
+            if *c == 0 {
+                break;
+            } else {
+                s.push(*c as char);
+            }
+        }
+        Ok(s)
+    }
+
+    pub fn svg(&mut self) -> Result<String, Error> {
+        let dot = match self.dot() {
+            Ok(s) => s,
+            Err(e) => return Err(e),
+        };
+
+        let mut err = Error::new();
+        let process = match Command::new("dot")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .arg("-Tsvg")
+            .spawn() {
+                Err(e) => {
+                    err.set(format!("cannot spawn dot: {}", e.description()));
+                    return Err(err);
+                },
+                Ok(p) => p,
+            };
+
+        match process.stdin.unwrap().write_all(dot.as_bytes()) {
+            Err(e) => {
+                err.set(format!("cannot write dot stdin: {}", e.description()));
+                return Err(err);
+            },
+            Ok(_) => {},
+        };
+
+        let mut out = String::new();
+        match process.stdout.unwrap().read_to_string(&mut out) {
+             Err(e) => {
+                err.set(format!("cannot read dot stdout: {}", e.description()));
+                return Err(err);
+            },
+            Ok(_) => {},
+        }
+
+        return Ok(out);
     }
 
     // TODO: use macro ?
@@ -254,6 +304,7 @@ mod tests {
         tap1.poll().unwrap();
         tap2.poll().unwrap();
         tap1.dot().unwrap();
+        tap1.svg().unwrap();
     }
 
     #[test]

@@ -55,6 +55,17 @@ impl Graph {
             }
         }
     }
+
+    pub fn svg(&mut self) -> Result<String, Error> {
+        match self.bricks.iter_mut().next() {
+            Some((_, b)) => b.svg(),
+            None => {
+                let mut e = Error::new();
+                e.set("no brick available in graph");
+                return Err(e);
+            }
+        }
+    }
 }
 
 #[cfg(test)]
